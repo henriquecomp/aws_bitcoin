@@ -1,0 +1,9 @@
+.venv
+.terraform
+*DS_Store*
+*.hcl
+*lock*
+*.info
+*.pkg
+*tfstate*
+
