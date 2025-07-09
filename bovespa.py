@@ -1,4 +1,4 @@
-import time
+from datetime import datetime
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -34,7 +34,10 @@ def extrair_dados_da_pagina_atual(driver):
                     "acao": celulas[1].text.strip(),
                     "tipo": celulas[2].text.strip(),
                     "qtde_teorica": int(limpar_numero(celulas[3].text.strip())),
-                    "participacao_percentual": limpar_numero(celulas[4].text.strip())
+                    "participacao_percentual": limpar_numero(celulas[4].text.strip()),
+                    "ano": datetime.now().year,
+                    "mes": datetime.now().month,
+                    "dia": datetime.now().day
                 }
                 dados_acoes_pagina.append(dados_acao)
     except TimeoutException:
@@ -127,7 +130,14 @@ if __name__ == "__main__":
 
         print(f"\nTotal de ativos raspados: {len(df_ibovespa_completo)}")
 
+        bucket = "s3://henrique-b3/raw/"
+
         nome_arquivo = "ibovespa"
         df_ibovespa_completo.to_csv(f"{nome_arquivo}.csv", index=False, sep=';', encoding='utf-8-sig')
-        df_ibovespa_completo.to_parquet(f"{nome_arquivo}.parquet", engine='pyarrow', compression='snappy')
+        df_ibovespa_completo.to_parquet(
+            bucket, 
+            engine='pyarrow', 
+            compression='snappy',
+            partition_cols=['ano', 'mes', 'dia'],
+            basename_template="dados-{i}.parquet")
         print(f"\nDados salvos com sucesso no arquivo '{nome_arquivo}'")
