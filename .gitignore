@@ -6,4 +6,6 @@
 *.info
 *.pkg
 *tfstate*
+*.csv
+*.parquet
 
